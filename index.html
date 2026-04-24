@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Opening Atlas</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="hero">
+        <div class="hero-topbar">
+          <div>
+            <p class="eyebrow">Interactive chess study</p>
+            <h1>Opening Atlas</h1>
+          </div>
+          <div class="theme-picker-wrap">
+            <label class="theme-picker-label" for="theme-toggle">Theme</label>
+            <select class="theme-toggle" id="theme-toggle">
+              <option value="system">System</option>
+              <option value="light">Light</option>
+              <option value="dark">Dark</option>
+              <option value="dracula">Dracula</option>
+              <option value="catppuccin">Catppuccin</option>
+            </select>
+          </div>
+        </div>
+        <p class="hero-copy">
+          Explore staple openings for White and Black, flip the board instantly,
+          and walk through each move with your keyboard or playback controls.
+        </p>
+      </section>
+
+      <section class="workspace">
+        <aside class="sidebar panel">
+          <div class="field-group">
+            <label for="side-select">Study side</label>
+            <select id="side-select"></select>
+          </div>
+
+          <div class="field-group">
+            <label for="opening-select">Opening family</label>
+            <select id="opening-select"></select>
+          </div>
+
+          <div class="field-group">
+            <label for="variant-select">Variant</label>
+            <select id="variant-select"></select>
+          </div>
+
+          <article class="opening-card">
+            <p class="opening-tag" id="opening-family"></p>
+            <h2 id="opening-name"></h2>
+            <p id="opening-description"></p>
+          </article>
+
+          <div class="legend">
+            <h3>Keyboard</h3>
+            <p><kbd>&larr;</kbd> Previous</p>
+            <p><kbd>&rarr;</kbd> Next</p>
+            <p><kbd>Space</kbd> Play or pause</p>
+            <p><kbd>F</kbd> Flip board</p>
+          </div>
+        </aside>
+
+        <section class="board-panel panel">
+          <div class="board-toolbar">
+            <div>
+              <p class="toolbar-label">Position</p>
+              <h2 id="position-title">Starting position</h2>
+            </div>
+            <button class="ghost-button" id="flip-button" type="button">
+              Flip board
+            </button>
+          </div>
+
+          <div class="board-wrap">
+            <div class="coordinates coordinates-top" id="coordinates-top"></div>
+            <div class="board-grid-row">
+              <div class="coordinates coordinates-left" id="coordinates-left"></div>
+              <div class="board" id="board" aria-label="Chess board"></div>
+              <div class="coordinates coordinates-right" id="coordinates-right"></div>
+            </div>
+            <div class="coordinates coordinates-bottom" id="coordinates-bottom"></div>
+          </div>
+
+          <div class="controls">
+            <button id="reset-button" type="button">Reset</button>
+            <button id="prev-button" type="button">Previous</button>
+            <button id="play-button" type="button">Play</button>
+            <button id="next-button" type="button">Next</button>
+          </div>
+        </section>
+
+        <section class="moves-panel panel">
+          <div class="moves-header">
+            <div>
+              <p class="toolbar-label">Line</p>
+              <h2>Move order</h2>
+            </div>
+            <p class="progress" id="progress-label"></p>
+          </div>
+          <ol class="moves-list" id="moves-list"></ol>
+        </section>
+      </section>
+    </main>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
