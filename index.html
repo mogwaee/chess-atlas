@@ -21,13 +21,14 @@
               <option value="light">Light</option>
               <option value="dark">Dark</option>
               <option value="dracula">Dracula</option>
-              <option value="catppuccin">Catppuccin</option>
+              <option value="catppuccin-mocha">Catppuccin Mocha</option>
+              <option value="catppuccin-latte">Catppuccin Latte</option>
+              <option value="synthwave-84">SynthWave '84</option>
             </select>
           </div>
         </div>
         <p class="hero-copy">
-          Explore staple openings for White and Black, flip the board instantly,
-          and walk through each move with your keyboard or playback controls.
+          Explore staple Chess openings.
         </p>
       </section>
 
@@ -41,6 +42,7 @@
           <div class="field-group">
             <label for="opening-select">Opening family</label>
             <select id="opening-select"></select>
+            <p class="field-hint">Most popular first</p>
           </div>
 
           <div class="field-group">
@@ -67,7 +69,7 @@
           <div class="board-toolbar">
             <div>
               <p class="toolbar-label">Position</p>
-              <h2 id="position-title">Starting position</h2>
+              <h2 id="position-title" aria-live="polite">Starting position</h2>
             </div>
             <button class="ghost-button" id="flip-button" type="button">
               Flip board
@@ -78,7 +80,12 @@
             <div class="coordinates coordinates-top" id="coordinates-top"></div>
             <div class="board-grid-row">
               <div class="coordinates coordinates-left" id="coordinates-left"></div>
-              <div class="board" id="board" aria-label="Chess board"></div>
+              <div
+                class="board"
+                id="board"
+                role="grid"
+                aria-label="Chess board"
+              ></div>
               <div class="coordinates coordinates-right" id="coordinates-right"></div>
             </div>
             <div class="coordinates coordinates-bottom" id="coordinates-bottom"></div>
@@ -98,7 +105,7 @@
               <p class="toolbar-label">Line</p>
               <h2>Move order</h2>
             </div>
-            <p class="progress" id="progress-label"></p>
+            <p class="progress" id="progress-label" aria-live="polite"></p>
           </div>
           <ol class="moves-list" id="moves-list"></ol>
         </section>

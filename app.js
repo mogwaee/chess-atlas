@@ -1,3 +1,9 @@
+import {
+  applyMove,
+  createInitialBoard,
+  validateOpenings,
+} from "./chess.js";
+
 const PIECES = {
   wp: "♙",
   wr: "♖",
@@ -11,6 +17,21 @@ const PIECES = {
   bb: "♝",
   bq: "♛",
   bk: "♚",
+};
+
+const PIECE_NAMES = {
+  wp: "white pawn",
+  wr: "white rook",
+  wn: "white knight",
+  wb: "white bishop",
+  wq: "white queen",
+  wk: "white king",
+  bp: "black pawn",
+  br: "black rook",
+  bn: "black knight",
+  bb: "black bishop",
+  bq: "black queen",
+  bk: "black king",
 };
 
 const OPENINGS = {
@@ -127,7 +148,7 @@ const OPENINGS = {
             { from: "d8", to: "f6", notation: "... Qf6" },
             { from: "e4", to: "e5", notation: "9. e5" },
             { from: "f6", to: "g6", notation: "... Qg6" },
-            { from: "b1", to: "c3", notation: "10. Nc3" },
+            { from: "b1", to: "c3", notation: "10. Nxc3" },
             { from: "g8", to: "e7", notation: "... Nge7" },
           ],
         },
@@ -137,9 +158,9 @@ const OPENINGS = {
       family: "Queen's Gambit",
       variants: [
         {
-          name: "Declined, Orthodox",
+          name: "Tartakower Defense, Exchange Variation",
           description:
-            "The classical Queen's Gambit Declined with solid development and the orthodox center.",
+            "A Queen's Gambit Declined line combining the Tartakower setup with an early central exchange.",
           moves: [
             { from: "d2", to: "d4", notation: "1. d4" },
             { from: "d7", to: "d5", notation: "... d5" },
@@ -184,7 +205,7 @@ const OPENINGS = {
             { from: "b7", to: "b5", notation: "... b5" },
             { from: "c4", to: "b3", notation: "8. Bb3" },
             { from: "c8", to: "b7", notation: "... Bb7" },
-            { from: "a1", to: "d1", notation: "9. Rd1" },
+            { from: "f1", to: "d1", notation: "9. Rd1" },
             { from: "b5", to: "b4", notation: "... b4" },
             { from: "b1", to: "d2", notation: "10. Nbd2" },
             { from: "b8", to: "d7", notation: "... Nbd7" },
@@ -316,9 +337,9 @@ const OPENINGS = {
       family: "Sicilian Defense",
       variants: [
         {
-          name: "Najdorf Variation",
+          name: "Najdorf, English Attack",
           description:
-            "The textbook Open Sicilian with ...a6 and queenside expansion against White's attacking setup.",
+            "The Najdorf English Attack with Be3, f3, Qd2, queenside castling, and opposing-wing attacks.",
           moves: [
             { from: "e2", to: "e4", notation: "1. e4" },
             { from: "c7", to: "c5", notation: "... c5" },
@@ -417,15 +438,15 @@ const OPENINGS = {
             { from: "a2", to: "a3", notation: "5. a3" },
             { from: "b4", to: "c3", notation: "... Bxc3+" },
             { from: "b2", to: "c3", notation: "6. bxc3" },
-            { from: "b8", to: "e7", notation: "... Ne7" },
+            { from: "g8", to: "e7", notation: "... Ne7" },
             { from: "d1", to: "g4", notation: "7. Qg4" },
             { from: "e8", to: "g8", notation: "... O-O" },
             { from: "f1", to: "d3", notation: "8. Bd3" },
             { from: "b7", to: "b6", notation: "... b6" },
             { from: "g1", to: "e2", notation: "9. Ne2" },
-            { from: "c8", to: "a6", notation: "... Qa6" },
+            { from: "c8", to: "a6", notation: "... Ba6" },
             { from: "e1", to: "g1", notation: "10. O-O" },
-            { from: "a6", to: "a4", notation: "... Qa4" },
+            { from: "a6", to: "d3", notation: "... Bxd3" },
           ],
         },
       ],
@@ -520,7 +541,7 @@ const OPENINGS = {
           ],
         },
         {
-          name: "Portuguese Variation",
+          name: "Portuguese Gambit, Banker Variation",
           description:
             "A sharper Scandinavian approach where Black develops actively and creates tactical pressure quickly.",
           moves: [
@@ -536,7 +557,7 @@ const OPENINGS = {
             { from: "e7", to: "e6", notation: "... e6" },
             { from: "b1", to: "c3", notation: "6. Nc3" },
             { from: "f8", to: "b4", notation: "... Bb4" },
-            { from: "c1", to: "d2", notation: "7. Bd2" },
+            { from: "a2", to: "a3", notation: "7. a3" },
             { from: "e8", to: "g8", notation: "... O-O" },
             { from: "a3", to: "b4", notation: "8. axb4" },
             { from: "e6", to: "d5", notation: "... exd5" },
@@ -613,6 +634,26 @@ const OPENINGS = {
 const files = ["a", "b", "c", "d", "e", "f", "g", "h"];
 const ranks = ["8", "7", "6", "5", "4", "3", "2", "1"];
 const THEME_STORAGE_KEY = "opening-atlas-theme";
+const FAMILY_POPULARITY = {
+  white: [
+    "Italian Game",
+    "London System",
+    "Queen's Gambit",
+    "Ruy Lopez",
+    "English Opening",
+  ],
+  black: [
+    "Sicilian Defense",
+    "Caro-Kann Defense",
+    "French Defense",
+    "King's Indian Defense",
+    "Scandinavian Defense",
+  ],
+};
+const VARIANT_POPULARITY = {
+  "French Defense": ["Winawer Variation", "Classical Variation"],
+  "Caro-Kann Defense": ["Advance Variation", "Classical Variation"],
+};
 
 const state = {
   side: "white",
@@ -646,45 +687,10 @@ const coordinatesLeft = document.querySelector("#coordinates-left");
 const coordinatesRight = document.querySelector("#coordinates-right");
 const themeToggle = document.querySelector("#theme-toggle");
 
-function createInitialBoard() {
-  const board = {};
-
-  files.forEach((file) => {
-    board[`${file}2`] = "wp";
-    board[`${file}7`] = "bp";
-  });
-
-  board.a1 = "wr";
-  board.b1 = "wn";
-  board.c1 = "wb";
-  board.d1 = "wq";
-  board.e1 = "wk";
-  board.f1 = "wb";
-  board.g1 = "wn";
-  board.h1 = "wr";
-
-  board.a8 = "br";
-  board.b8 = "bn";
-  board.c8 = "bb";
-  board.d8 = "bq";
-  board.e8 = "bk";
-  board.f8 = "bb";
-  board.g8 = "bn";
-  board.h8 = "br";
-
-  return board;
-}
-
-function cloneBoard(board) {
-  return JSON.parse(JSON.stringify(board));
-}
-
-function fileIndex(square) {
-  return files.indexOf(square[0]);
-}
-
 function currentFamilies() {
-  return OPENINGS[state.side];
+  return FAMILY_POPULARITY[state.side].map((familyName) =>
+    OPENINGS[state.side].find((family) => family.family === familyName),
+  );
 }
 
 function currentFamily() {
@@ -692,37 +698,20 @@ function currentFamily() {
 }
 
 function currentVariant() {
-  return currentFamily().variants[state.variantIndex];
+  return currentVariants()[state.variantIndex];
 }
 
-function applyMove(board, move) {
-  const nextBoard = cloneBoard(board);
-  const movingPiece = nextBoard[move.from];
+function currentVariants() {
+  const family = currentFamily();
+  const preferredOrder = VARIANT_POPULARITY[family.family];
 
-  if (!movingPiece) {
-    return nextBoard;
+  if (!preferredOrder) {
+    return family.variants;
   }
 
-  delete nextBoard[move.from];
-
-  if (movingPiece[1] === "k" && Math.abs(fileIndex(move.from) - fileIndex(move.to)) === 2) {
-    if (move.to === "g1") {
-      nextBoard.f1 = nextBoard.h1;
-      delete nextBoard.h1;
-    } else if (move.to === "c1") {
-      nextBoard.d1 = nextBoard.a1;
-      delete nextBoard.a1;
-    } else if (move.to === "g8") {
-      nextBoard.f8 = nextBoard.h8;
-      delete nextBoard.h8;
-    } else if (move.to === "c8") {
-      nextBoard.d8 = nextBoard.a8;
-      delete nextBoard.a8;
-    }
-  }
-
-  nextBoard[move.to] = move.promotion ?? movingPiece;
-  return nextBoard;
+  return preferredOrder.map((variantName) =>
+    family.variants.find((variant) => variant.name === variantName),
+  );
 }
 
 function getBoardAtStep(step) {
@@ -789,6 +778,11 @@ function renderBoard() {
       const piece = board[square];
       const squareNode = document.createElement("div");
       squareNode.className = `square ${squareColor(file, rank)}`;
+      squareNode.setAttribute("role", "gridcell");
+      squareNode.setAttribute(
+        "aria-label",
+        piece ? `${square}: ${PIECE_NAMES[piece]}` : `${square}: empty`,
+      );
 
       if (currentMove?.to === square) {
         squareNode.classList.add("active");
@@ -839,6 +833,10 @@ function renderOpeningMeta() {
   progressLabel.textContent = `${state.step}/${variant.moves.length} steps`;
   positionTitle.textContent =
     state.step === 0 ? "Starting position" : variant.moves[state.step - 1].notation;
+  boardElement.setAttribute(
+    "aria-label",
+    `${family.family}, ${variant.name}. ${positionTitle.textContent}.`,
+  );
 }
 
 function renderSideSelect() {
@@ -873,7 +871,7 @@ function renderFamilySelect() {
 function renderVariantSelect() {
   variantSelect.innerHTML = "";
 
-  currentFamily().variants.forEach((variant, index) => {
+  currentVariants().forEach((variant, index) => {
     const option = document.createElement("option");
     option.value = String(index);
     option.textContent = variant.name;
@@ -961,7 +959,10 @@ function render() {
 }
 
 function handleKeyboard(event) {
-  if (event.target instanceof HTMLSelectElement) {
+  if (
+    event.target instanceof HTMLSelectElement ||
+    event.target instanceof HTMLButtonElement
+  ) {
     return;
   }
 
@@ -1013,6 +1014,7 @@ themeToggle.addEventListener("change", (event) => {
 });
 document.addEventListener("keydown", handleKeyboard);
 
+validateOpenings(OPENINGS);
 loadTheme();
 renderSideSelect();
 renderFamilySelect();
